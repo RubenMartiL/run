@@ -1,0 +1,73 @@
+<div class="screen upgrades">
+  <header class="safe-top px-4 pb-2">
+    <div class="header-row">
+      <button type="button" class="icon-btn" aria-label="Back" (click)="back()">
+        <app-icon name="back" [size]="19" />
+      </button>
+      <div class="header-title">
+        <span class="eyebrow">PROGRESSION</span>
+        <h1 class="display text-2xl">UPGRADES</h1>
+      </div>
+      <div class="chip glass-chip">
+        <app-icon name="coin" [size]="17" class="text-sun-400" />
+        <span class="tabular-nums">{{ coins() }}</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="upgrade-scroll">
+    <div class="upgrade-note">
+      <app-icon name="shield" [size]="15" />
+      Permanent boosts for Campaign, Endless, Coin Rush, Survival and Boss Rush. They are frozen in Time Attack and the Daily Challenge.
+    </div>
+
+    @for (upgrade of upgrades(); track upgrade.def.id) {
+      <article class="upgrade-card" [class.maxed]="upgrade.maxed">
+        <div class="upgrade-head">
+          <span class="upgrade-icon"><app-icon [name]="upgrade.def.icon" [size]="20" /></span>
+          <div class="upgrade-title">
+            <h3 class="display">{{ upgrade.def.name }}</h3>
+            <span class="upgrade-effect">
+              {{ effectLabel(upgrade.def.id, upgrade.level) }}
+              @if (!upgrade.maxed) {
+                <span class="arrow">→ {{ effectLabel(upgrade.def.id, upgrade.level + 1) }}</span>
+              }
+            </span>
+          </div>
+          <span class="level-badge">LV {{ upgrade.level }}</span>
+        </div>
+
+        <p class="upgrade-desc">{{ upgrade.def.description }}</p>
+
+        <div class="pips">
+          @for (pip of pips; track pip) {
+            <span class="pip" [class.on]="pip < upgrade.level"></span>
+          }
+        </div>
+
+        @if (upgrade.maxed) {
+          <span class="max-chip">
+            <app-icon name="check" [size]="14" /> MAX LEVEL
+          </span>
+        } @else {
+          <button
+            type="button"
+            class="btn upgrade-buy"
+            [class.btn-primary]="upgrade.affordable"
+            [class.btn-secondary]="!upgrade.affordable"
+            (click)="buy(upgrade.def.id)"
+          >
+            <app-icon name="coin" [size]="15" />
+            UPGRADE · {{ upgrade.price }}
+          </button>
+        }
+      </article>
+    }
+
+    <div class="footer-space"></div>
+  </main>
+
+  @if (toast()) {
+    <div class="toast animate-pop-in">{{ toast() }}</div>
+  }
+</div>

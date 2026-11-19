@@ -1,0 +1,107 @@
+<div class="screen campaign">
+  <header class="safe-top px-4 pb-2">
+    <div class="header-row">
+      <button type="button" class="icon-btn" aria-label="Back to menu" (click)="back()">
+        <app-icon name="back" [size]="19" />
+      </button>
+      <div class="header-title">
+        <span class="eyebrow">CAMPAIGN</span>
+        <h1 class="display text-2xl">CHOOSE A WORLD</h1>
+      </div>
+      <div class="chip glass-chip">
+        <app-icon name="coin" [size]="17" class="text-sun-400" />
+        <span class="tabular-nums">{{ coins() }}</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="world-scroll">
+    @for (world of worlds; track world.theme.id; let wi = $index) {
+      <section
+        class="world-card"
+        [class.locked]="!isWorldUnlocked(wi)"
+        [class.open]="selectedWorld() === wi"
+      >
+        <button
+          type="button"
+          class="world-head"
+          [style.background]="'linear-gradient(135deg,' + world.theme.uiFrom + ' 0%,' + world.theme.uiTo + ' 100%)'"
+          (click)="toggleWorld(wi)"
+        >
+          <div class="world-head-top">
+            <span class="world-index">WORLD {{ wi + 1 }}</span>
+            <span class="world-stars">
+              <app-icon name="star" [size]="13" />
+              {{ worldStars(wi) }}/60
+            </span>
+          </div>
+
+          <div class="world-name-row">
+            <h2 class="display world-name">{{ world.theme.name }}</h2>
+            @if (!isWorldUnlocked(wi)) {
+              <span class="lock-badge"><app-icon name="lock" [size]="15" /></span>
+            } @else if (completedCount(wi) === 20) {
+              <span class="done-badge"><app-icon name="check" [size]="15" /></span>
+            }
+          </div>
+
+          <p class="world-tagline">{{ world.theme.tagline }}</p>
+
+          <div class="world-meta">
+            <span class="mechanic-chip">{{ world.theme.mechanic }}</span>
+            <span class="world-count">{{ completedCount(wi) }}/20 cleared</span>
+          </div>
+
+          <div class="progress-track">
+            <div class="progress-fill" [style.width.%]="progressPercent(wi)"></div>
+          </div>
+        </button>
+
+        @if (isWorldUnlocked(wi) && selectedWorld() === wi) {
+          <div class="level-area animate-rise-in">
+            <div class="boss-note">
+              <app-icon name="crown" [size]="15" class="text-sun-400" />
+              Boss levels: 5 · 15 · 20
+            </div>
+            <div class="level-grid">
+              @for (level of world.levels; track level.id; let li = $index) {
+                <button
+                  type="button"
+                  class="level-btn"
+                  [class.is-locked]="!isLevelUnlocked(wi, li)"
+                  [class.is-done]="starsFor(level.id) > 0"
+                  [class.is-next]="isLevelUnlocked(wi, li) && starsFor(level.id) === 0"
+                  [class.is-boss]="level.hasBoss"
+                  (click)="playLevel(wi, li, level.id)"
+                >
+                  @if (!isLevelUnlocked(wi, li)) {
+                    <app-icon name="lock" [size]="14" class="level-lock" />
+                  } @else {
+                    <span class="level-num display">{{ li + 1 }}</span>
+                    <span class="level-stars">
+                      @for (s of [0, 1, 2]; track s) {
+                        <span class="mini-star" [class.on]="starsFor(level.id) > s">★</span>
+                      }
+                    </span>
+                  }
+                  @if (level.hasBoss) {
+                    <span class="boss-dot"></span>
+                  }
+                </button>
+              }
+            </div>
+          </div>
+        }
+
+        @if (!isWorldUnlocked(wi)) {
+          <div class="locked-strip">
+            <app-icon name="lock" [size]="14" />
+            Clear World {{ wi }} to unlock
+          </div>
+        }
+      </section>
+    }
+
+    <div class="footer-space"></div>
+  </main>
+</div>

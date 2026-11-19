@@ -1,0 +1,153 @@
+@if (level(); as lvl) {
+  <canvas #canvas class="game-canvas" aria-label="Gate Runner playfield"></canvas>
+
+  <div class="hud">
+    <div class="combo-aura" [class.on]="snapshot().combo >= 3"></div>
+    <div class="hud-top safe-top">
+      <button
+        type="button"
+        class="icon-btn pause-btn"
+        aria-label="Pause"
+        [disabled]="!!result()"
+        (click)="pause()"
+      >
+        <app-icon name="pause" [size]="17" />
+      </button>
+
+      @if (showProgress()) {
+        <div class="progress-wrap">
+          <div class="progress-meta">
+            <span class="progress-level">{{ levelLabel() }}</span>
+            <span class="progress-world">{{ worldName() }}</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="snapshot().progress * 100"></div>
+            <span class="progress-cap" [style.left.%]="snapshot().progress * 100"></span>
+          </div>
+        </div>
+      } @else {
+        <div class="mode-pill">
+          <span class="mode-pill-title">{{ levelLabel() }}</span>
+          <span class="mode-pill-sub">{{ formatDistance(snapshot().distance) }}</span>
+        </div>
+      }
+
+      <div class="chip glass-chip coin-chip" [class.pulse]="coinPulse()">
+        <app-icon name="coin" [size]="16" class="text-sun-400" />
+        <span class="tabular-nums">{{ snapshot().coins }}</span>
+      </div>
+    </div>
+
+    <div class="hud-mid">
+      <div class="crowd-badge" [class.pulse]="crowdPulse()" [class.combo]="snapshot().combo >= 3">
+        <span class="crowd-label">CROWD</span>
+        <span class="crowd-value display">{{ formatCount(snapshot().crowd) }}</span>
+      </div>
+
+      <div class="powerups">
+        @if (snapshot().timeLimit > 0) {
+          <span
+            class="powerup timer"
+            [class.urgent]="snapshot().timeLimit - snapshot().timer <= 10"
+          >
+            <app-icon name="target" [size]="14" /> {{ timerLabel() }}
+          </span>
+        }
+        @if (snapshot().coinTarget > 0) {
+          <span class="powerup target">
+            <app-icon name="coin" [size]="14" /> {{ snapshot().coins }}/{{ snapshot().coinTarget }}
+          </span>
+        }
+        @if (snapshot().bossTotal > 0) {
+          <span class="powerup boss">
+            <app-icon name="crown" [size]="14" /> {{ snapshot().bossIndex + 1 }}/{{ snapshot().bossTotal }}
+          </span>
+        }
+        @if (snapshot().shield > 0) {
+          <span class="powerup shield"><app-icon name="shield" [size]="14" /> SHIELD</span>
+        }
+        @if (snapshot().magnet > 0) {
+          <span class="powerup magnet">
+            <app-icon name="magnet" [size]="14" /> {{ seconds(snapshot().magnet) }}s
+          </span>
+        }
+        @if (snapshot().turbo > 0) {
+          <span class="powerup turbo">
+            <app-icon name="bolt" [size]="14" /> {{ seconds(snapshot().turbo) }}s
+          </span>
+        }
+      </div>
+    </div>
+
+    @if (snapshot().battle; as battle) {
+      <div class="battle-banner animate-pop-in">
+        <span class="vs">VS</span>
+        <span class="battle-label">{{ battle.label }}</span>
+      </div>
+    }
+
+    @if (introVisible()) {
+      <div class="intro">
+        <span class="intro-kicker">{{ lvl.hasBoss ? 'BOSS LEVEL' : 'GET READY' }}</span>
+        <span class="intro-title display">{{ lvl.mode === 'campaign' ? worldName() : levelLabel() }}</span>
+        <span class="intro-level">{{ lvl.mode === 'campaign' ? levelLabel() : worldName() }}</span>
+      </div>
+    }
+
+    @if (bossTransition()) {
+      <div class="boss-transition animate-pop-in">
+        <span class="boss-kicker">BOSS DEFEATED</span>
+        <span class="boss-title display">NEXT BOSS INCOMING</span>
+      </div>
+    }
+
+    @if (hintVisible()) {
+      <div class="hint">
+        <span class="hint-arrow">‹</span>
+        DRAG TO STEER
+        <span class="hint-arrow">›</span>
+      </div>
+    }
+  </div>
+
+  <div class="coin-fly-layer">
+    @for (fly of coinFlies(); track fly.id) {
+      <span
+        class="coin-fly"
+        [style.left.%]="fly.left"
+        [style.animation-delay.ms]="fly.delay"
+      >
+        <app-icon name="coin" [size]="18" />
+      </span>
+    }
+  </div>
+
+  @if (showPause()) {
+    <app-pause-overlay
+      [levelLabel]="levelLabel()"
+      [worldName]="worldName()"
+      (resume)="resume()"
+      (restart)="restart()"
+      (quit)="quit()"
+    />
+  }
+
+  @if (result(); as res) {
+    <app-result-overlay
+      [result]="res"
+      [levelLabel]="levelLabel()"
+      [worldName]="worldName()"
+      [hasNext]="hasNext()"
+      [canRevive]="canRevive()"
+      [canDouble]="canDouble()"
+      [doubled]="doubled()"
+      [bonusCoins]="bonusCoins()"
+      [worldClear]="worldClear()"
+      (retry)="retry()"
+      (next)="nextLevel()"
+      (map)="goToMap()"
+      (revive)="revive()"
+      (doubleCoins)="doubleCoins()"
+    />
+  }
+}

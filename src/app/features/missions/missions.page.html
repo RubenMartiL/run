@@ -1,0 +1,223 @@
+<div class="screen missions">
+  <header class="safe-top px-4 pb-2">
+    <div class="header-row">
+      <button type="button" class="icon-btn" aria-label="Back" (click)="back()">
+        <app-icon name="back" [size]="19" />
+      </button>
+      <div class="header-title">
+        <span class="eyebrow">REWARDS</span>
+        <h1 class="display text-2xl">MISSIONS</h1>
+      </div>
+      <div class="wallet">
+        <span class="chip glass-chip"><app-icon name="coin" [size]="15" class="text-sun-400" />{{ coins() }}</span>
+        <span class="chip glass-chip"><app-icon name="star" [size]="15" class="text-grape-400" />{{ gems() }}</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button type="button" class="tab" [class.active]="tab() === 'daily'" (click)="setTab('daily')">
+      DAILY
+      @if (completedDailies() > 0) {
+        <span class="tab-dot">{{ completedDailies() }}</span>
+      }
+    </button>
+    <button type="button" class="tab" [class.active]="tab() === 'rewards'" (click)="setTab('rewards')">
+      REWARDS
+      @if (dailyRewardAvailable() || chestAvailable()) {
+        <span class="tab-dot">!</span>
+      }
+    </button>
+    <button type="button" class="tab" [class.active]="tab() === 'achievements'" (click)="setTab('achievements')">
+      TROPHIES
+    </button>
+  </div>
+
+  <main class="mission-scroll">
+    @if (tab() === 'daily') {
+      <div class="section-note">
+        <app-icon name="target" [size]="15" />
+        <span>Three fresh missions every day. Progress updates from every mode.</span>
+      </div>
+
+      @for (mission of daily(); track mission.def.id) {
+        <article class="mission-card" [class.done]="mission.complete">
+          <div class="mission-head">
+            <div>
+              <h3 class="display">{{ mission.def.title }}</h3>
+              <p>{{ mission.def.hint }}</p>
+            </div>
+            <span class="mission-reward">
+              <app-icon name="coin" [size]="13" /> {{ mission.def.rewardCoins }}
+              @if (mission.def.rewardGems > 0) {
+                <span class="gem"><app-icon name="star" [size]="11" />{{ mission.def.rewardGems }}</span>
+              }
+            </span>
+          </div>
+
+          <div class="mission-progress">
+            <div class="bar">
+              <div class="fill" [style.width.%]="progressPercent(mission.progress, mission.def.target)"></div>
+            </div>
+            <span class="progress-label">{{ mission.progress }}/{{ mission.def.target }}</span>
+          </div>
+
+          @if (mission.claimed) {
+            <span class="claimed-chip"><app-icon name="check" [size]="13" /> CLAIMED</span>
+          } @else if (mission.complete) {
+            <button type="button" class="btn btn-primary claim-btn" (click)="claimDaily(mission.def.id)">
+              CLAIM REWARD
+            </button>
+          } @else {
+            <span class="pending-chip">IN PROGRESS</span>
+          }
+        </article>
+      }
+    }
+
+    @if (tab() === 'rewards') {
+      <article class="streak-card">
+        <div class="streak-head">
+          <span class="streak-icon"><app-icon name="trophy" [size]="22" /></span>
+          <div class="streak-copy">
+            <h3 class="display">7-DAY LOGIN STREAK</h3>
+            <p>Claim every day for bigger rewards. Missing a day resets to Day 1.</p>
+          </div>
+          <span class="streak-badge">DAY {{ nextStreak() }}</span>
+        </div>
+
+        <div class="streak-days">
+          @for (reward of dailyRewards; track reward.day) {
+            <div class="streak-day" [class.claimed]="reward.day <= streak()" [class.today]="reward.day === nextStreak()">
+              <span class="day-label">D{{ reward.day }}</span>
+              @if (reward.gems > 0) {
+                <span class="day-reward gem">◆{{ reward.gems }}</span>
+              } @else {
+                <span class="day-reward">{{ reward.coins }}</span>
+              }
+            </div>
+          }
+        </div>
+
+        @if (dailyRewardAvailable()) {
+          <button type="button" class="btn btn-primary w-full py-3" (click)="claimReward()">
+            CLAIM DAY {{ nextStreak() }}
+          </button>
+        } @else {
+          <div class="streak-actions">
+            <span class="claimed-chip"><app-icon name="check" [size]="13" /> CLAIMED TODAY</span>
+            @if (dailyBonusAvailable()) {
+              <button type="button" class="btn btn-sun bonus-btn" (click)="claimBonus()">
+                BONUS · WATCH AD
+              </button>
+            }
+          </div>
+        }
+      </article>
+
+      <div class="chest-row">
+        <article class="chest-card">
+          <span class="chest-icon" [class.locked]="!chestAvailable()">
+            <app-icon name="trophy" [size]="26" />
+          </span>
+          <h3 class="display">DAILY CHEST</h3>
+          <p>Coins and a chance at gems.</p>
+          @if (chestAvailable()) {
+            <button type="button" class="btn btn-secondary w-full py-2.5 text-xs" (click)="openChest('free')">
+              OPEN CHEST
+            </button>
+          } @else {
+            <span class="claimed-chip"><app-icon name="check" [size]="13" /> OPENED</span>
+          }
+        </article>
+
+        <article class="chest-card bonus">
+          <span class="chest-icon" [class.locked]="!bonusChestAvailable()">
+            <app-icon name="star" [size]="26" />
+          </span>
+          <h3 class="display">BONUS CHEST</h3>
+          <p>One extra chest per day.</p>
+          @if (bonusChestAvailable()) {
+            <button type="button" class="btn btn-sun w-full py-2.5 text-xs" (click)="openBonusChest()">
+              OPEN · WATCH AD
+            </button>
+          } @else {
+            <span class="claimed-chip"><app-icon name="check" [size]="13" /> OPENED</span>
+          }
+        </article>
+      </div>
+
+      <article class="event-card">
+        <div class="event-head">
+          <span class="event-icon"><app-icon name="crown" [size]="20" /></span>
+          <div>
+            <span class="event-kicker">THIS WEEK'S EVENT</span>
+            <h3 class="display">{{ weeklyEvent.title }}</h3>
+          </div>
+          <span class="event-reward">+{{ weeklyEvent.rewardCoins }} · ◆{{ weeklyEvent.rewardGems }}</span>
+        </div>
+        <p class="event-hint">{{ weeklyEvent.hint }}</p>
+        <div class="mission-progress">
+          <div class="bar">
+            <div class="fill event-fill" [style.width.%]="progressPercent(eventProgress(), weeklyEvent.target)"></div>
+          </div>
+          <span class="progress-label">{{ eventProgress() }}/{{ weeklyEvent.target }}</span>
+        </div>
+        @if (eventClaimed()) {
+          <span class="claimed-chip"><app-icon name="check" [size]="13" /> CLAIMED</span>
+        } @else if (eventComplete()) {
+          <button type="button" class="btn btn-primary w-full py-2.5" (click)="claimEvent()">
+            CLAIM EVENT REWARD
+          </button>
+        } @else {
+          <span class="pending-chip">KEEP COLLECTING</span>
+        }
+      </article>
+    }
+
+    @if (tab() === 'achievements') {
+      <div class="section-note">
+        <app-icon name="trophy" [size]="15" />
+        <span>Lifetime goals. Progress is saved forever and rewards can be claimed once.</span>
+      </div>
+
+      @for (achievement of achievements(); track achievement.def.id) {
+        <article class="achievement-card" [class.done]="achievement.complete">
+          <span class="ach-icon"><app-icon [name]="achievement.claimed ? 'check' : 'trophy'" [size]="18" /></span>
+          <div class="ach-body">
+            <div class="ach-head">
+              <h3 class="display">{{ achievement.def.title }}</h3>
+              <span class="ach-progress">{{ achievement.progress }}/{{ achievement.def.target }}</span>
+            </div>
+            <p>{{ achievement.def.hint }}</p>
+            <div class="bar">
+              <div class="fill" [style.width.%]="progressPercent(achievement.progress, achievement.def.target)"></div>
+            </div>
+          </div>
+          <div class="ach-action">
+            @if (achievement.claimed) {
+              <span class="ach-claimed"><app-icon name="check" [size]="16" /></span>
+            } @else if (achievement.complete) {
+              <button type="button" class="btn btn-primary ach-btn" (click)="claimAchievement(achievement.def.id)">
+                CLAIM
+              </button>
+            } @else {
+              <span class="ach-reward">
+                <app-icon name="coin" [size]="12" />{{ achievement.def.rewardCoins }}
+                @if (achievement.def.rewardGems > 0) {
+                  <span class="gem">◆{{ achievement.def.rewardGems }}</span>
+                }
+              </span>
+            }
+          </div>
+        </article>
+      }
+    }
+
+    <div class="footer-space"></div>
+  </main>
+
+  @if (toast()) {
+    <div class="toast animate-pop-in">{{ toast() }}</div>
+  }
+</div>

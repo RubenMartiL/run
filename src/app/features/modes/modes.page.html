@@ -1,0 +1,68 @@
+<div class="screen modes">
+  <header class="safe-top px-4 pb-2">
+    <div class="header-row">
+      <button type="button" class="icon-btn" aria-label="Back" (click)="back()">
+        <app-icon name="back" [size]="19" />
+      </button>
+      <div class="header-title">
+        <span class="eyebrow">PLAY</span>
+        <h1 class="display text-2xl">GAME MODES</h1>
+      </div>
+      <div class="chip glass-chip">
+        <app-icon name="coin" [size]="17" class="text-sun-400" />
+        <span class="tabular-nums">{{ coins() }}</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="mode-scroll">
+    <button type="button" class="daily-card" (click)="playMode('daily')">
+      <div class="daily-glow"></div>
+      <div class="daily-content">
+        <span class="daily-kicker">
+          <app-icon name="star" [size]="12" />
+          DAILY CHALLENGE · {{ today }}
+        </span>
+        <h2 class="display daily-title">CLOCKWORK RUN</h2>
+        <p class="daily-sub">One seeded course. Upgrades are disabled. {{ dailyBest() }}</p>
+        <span class="daily-cta">PLAY TODAY'S COURSE <app-icon name="next" [size]="14" /></span>
+      </div>
+      <span class="daily-icon"><app-icon name="target" [size]="34" /></span>
+    </button>
+
+    <div class="mode-grid">
+      @for (mode of modes; track mode.id) {
+        <article class="mode-card" [style.border-color]="mode.accent + '55'">
+          <div
+            class="mode-icon"
+            [style.background]="'linear-gradient(145deg,' + mode.accent + ',' + mode.accent + '99)'"
+          >
+            <app-icon [name]="mode.icon" [size]="22" />
+          </div>
+          <div class="mode-body">
+            <div class="mode-head">
+              <h3 class="display">{{ mode.name }}</h3>
+              <span class="mode-best">{{ mode.scoreLabel }}: {{ bestValue(mode.id) }}</span>
+            </div>
+            <p class="mode-desc">{{ mode.description }}</p>
+            <button
+              type="button"
+              class="btn mode-play"
+              [style.background]="'linear-gradient(180deg,' + mode.accent + ',' + mode.accent + 'cc)'"
+              (click)="playMode(mode.id)"
+            >
+              PLAY
+              <app-icon name="play" [size]="14" />
+            </button>
+          </div>
+        </article>
+      }
+    </div>
+
+    <div class="modes-note">
+      <app-icon name="shield" [size]="15" />
+      Upgrades and cosmetics apply in every mode except Time Attack and the Daily Challenge.
+    </div>
+    <div class="footer-space"></div>
+  </main>
+</div>

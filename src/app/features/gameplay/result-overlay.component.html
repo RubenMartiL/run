@@ -1,0 +1,109 @@
+<div class="result-overlay">
+  @if (result().won) {
+    <div class="confetti-burst show">
+      @for (c of confetti; track $index) {
+        <span
+          class="confetti"
+          [style.left.%]="c.left"
+          [style.background]="c.color"
+          [style.animation-delay.ms]="c.delay"
+        ></span>
+      }
+    </div>
+  }
+
+  <section class="result-card animate-pop-in" [class.win]="result().won" [class.lose]="!result().won">
+    <div class="result-top">
+      <span class="eyebrow">{{ kicker() }}</span>
+      <h2 class="display result-title">{{ title() }}</h2>
+      <p class="result-sub">{{ worldName() }} · {{ levelLabel() }}</p>
+    </div>
+
+    @if (isCampaign() && result().won) {
+      <div class="stars">
+        @for (star of [0, 1, 2]; track star) {
+          <span
+            class="star"
+            [class.on]="star < result().stars"
+            [style.animation-delay.ms]="180 + star * 160"
+          >★</span>
+        }
+      </div>
+    }
+
+    @if (isTimed() && result().won) {
+      <div class="medal-row">
+        <span class="medal gold" [class.active]="result().medal === 'gold'">GOLD</span>
+        <span class="medal silver" [class.active]="result().medal === 'silver'">SILVER</span>
+        <span class="medal bronze" [class.active]="result().medal === 'bronze'">BRONZE</span>
+      </div>
+    }
+
+    @if (!result().won) {
+      <div class="reason-badge">
+        <app-icon name="close" [size]="15" />
+        {{ result().reason }}
+      </div>
+    }
+
+    <div class="reward-grid">
+      <div class="reward">
+        <span class="reward-label">{{ primaryLabel() }}</span>
+        <span class="reward-value">{{ primaryValue() }}</span>
+      </div>
+      <div class="reward">
+        <span class="reward-label">COINS EARNED</span>
+        <span class="reward-value coin">
+          <app-icon name="coin" [size]="16" />
+          +{{ displayCoins() }}
+        </span>
+      </div>
+    </div>
+
+    @if (doubled()) {
+      <div class="bonus-chip animate-pop-in">
+        <app-icon name="play" [size]="13" />
+        AD BONUS · +{{ bonusCoins() }} COINS
+      </div>
+    }
+
+    @if (worldClear()) {
+      <div class="bonus-chip world animate-pop-in">
+        <app-icon name="crown" [size]="13" />
+        WORLD CLEARED · +300 COINS · +5 GEMS
+      </div>
+    }
+
+    <div class="result-actions">
+      @if (canRevive()) {
+        <button type="button" class="btn btn-primary w-full py-3.5 text-base" (click)="revive.emit()">
+          <app-icon name="play" [size]="18" />
+          CONTINUE · WATCH AD
+        </button>
+      }
+
+      @if (isCampaign() && result().won && hasNext()) {
+        <button type="button" class="btn btn-primary w-full py-3.5 text-lg" (click)="next.emit()">
+          NEXT LEVEL
+          <app-icon name="next" [size]="18" />
+        </button>
+      }
+
+      @if (canDouble()) {
+        <button type="button" class="btn btn-sun w-full py-3 text-sm" (click)="doubleCoins.emit()">
+          <app-icon name="coin" [size]="17" />
+          DOUBLE COINS · WATCH AD
+        </button>
+      }
+
+      <div class="flex gap-2.5 w-full">
+        <button type="button" class="btn btn-secondary flex-1 py-3 text-sm" (click)="retry.emit()">
+          RETRY
+        </button>
+        <button type="button" class="btn btn-ghost flex-1 py-3 text-sm" (click)="map.emit()">
+          {{ isCampaign() ? 'WORLD MAP' : 'MODES' }}
+        </button>
+      </div>
+    </div>
+  </section>
+</div>

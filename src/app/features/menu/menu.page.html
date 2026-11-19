@@ -1,0 +1,194 @@
+<div class="screen menu">
+  <div class="aurora aurora-a"></div>
+  <div class="aurora aurora-b"></div>
+
+  <header class="safe-top flex items-center justify-between px-5 pb-1">
+    <div class="chip glass-chip">
+      <app-icon name="coin" [size]="18" class="text-sun-400" />
+      <span class="tabular-nums">{{ coins() }}</span>
+    </div>
+    <button class="icon-btn" type="button" aria-label="Settings" (click)="openSettings()">
+      <app-icon name="settings" [size]="21" />
+    </button>
+  </header>
+
+  <main class="flex flex-1 flex-col items-center px-5">
+    <div class="hero">
+      <div class="logo-row animate-pop-in">
+        <span class="logo-gate gate-a"></span>
+        <h1 class="display logo-title">GATE<br />RUNNER</h1>
+        <span class="logo-gate gate-b"></span>
+      </div>
+      <p class="logo-sub">Grow the crowd. Pick the smart gate.</p>
+
+      <div class="crowd-strip animate-float-soft">
+        @for (i of [0, 1, 2, 3, 4, 5]; track i) {
+          <span class="mini" [class.mini-alt]="i % 2 === 1"></span>
+        }
+      </div>
+    </div>
+
+    <button type="button" class="next-card inset-line" (click)="continueRun()">
+      <span class="next-badge" [style.background]="'linear-gradient(135deg,' + nextLevel().from + ',' + nextLevel().to + ')'">
+        <app-icon name="play" [size]="18" />
+      </span>
+      <span class="next-copy">
+        <span class="next-label">{{ totalRuns() === 0 ? 'START HERE' : 'CONTINUE RUN' }}</span>
+        <span class="next-title">{{ nextLevel().worldName }} · Level {{ nextLevel().levelNumber }}</span>
+      </span>
+      <app-icon name="next" [size]="18" class="next-arrow" />
+    </button>
+
+    <div class="quick-grid">
+      <button type="button" class="quick-card" (click)="openModes()">
+        <span class="quick-icon modes"><app-icon name="bolt" [size]="19" /></span>
+        <span class="quick-copy">
+          <strong>MODES</strong>
+          <span>5 ways to run</span>
+        </span>
+      </button>
+      <button type="button" class="quick-card" (click)="openShop()">
+        <span class="quick-icon shop"><app-icon name="star" [size]="19" /></span>
+        <span class="quick-copy">
+          <strong>SHOP</strong>
+          <span>Skins & upgrades</span>
+        </span>
+      </button>
+      <button type="button" class="quick-card" (click)="openMissions()">
+        <span class="quick-icon missions"><app-icon name="trophy" [size]="19" /></span>
+        @if (rewardReady()) {
+          <span class="reward-dot"></span>
+        }
+        <span class="quick-copy">
+          <strong>MISSIONS</strong>
+          <span>Daily rewards</span>
+        </span>
+      </button>
+    </div>
+
+    <div class="actions">
+      <button type="button" class="btn btn-primary w-full py-4 text-xl" (click)="play()">
+        <app-icon name="flag" [size]="22" />
+        PLAY
+      </button>
+
+      <div class="flex gap-3 w-full">
+        <button type="button" class="btn btn-secondary flex-1 py-3 text-base" (click)="openHelp()">
+          HOW TO PLAY
+        </button>
+        <button type="button" class="btn btn-ghost flex-1 py-3 text-base" (click)="openSettings()">
+          <app-icon name="settings" [size]="17" />
+          OPTIONS
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <footer class="safe-bottom px-5 pb-4">
+    <div class="stat-row">
+      <div class="stat">
+        <app-icon name="star" [size]="16" class="text-sun-400" />
+        <span class="stat-value">{{ totalStars() }}</span>
+        <span class="stat-label">stars</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <app-icon name="target" [size]="16" class="text-mint-400" />
+        <span class="stat-value">{{ bestCrowd() }}</span>
+        <span class="stat-label">best crowd</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <app-icon name="trophy" [size]="16" class="text-grape-400" />
+        <span class="stat-value">{{ totalRuns() }}</span>
+        <span class="stat-label">runs</span>
+      </div>
+    </div>
+  </footer>
+
+  @if (settingsOpen()) {
+    <div class="overlay" (click)="closePanels()">
+      <section class="panel sheet animate-rise-in" (click)="$event.stopPropagation()">
+        <div class="sheet-head">
+          <h2 class="display text-2xl">OPTIONS</h2>
+          <button type="button" class="icon-btn" aria-label="Close" (click)="closePanels()">
+            <app-icon name="close" [size]="18" />
+          </button>
+        </div>
+
+        <button type="button" class="toggle-row" (click)="toggleSound()">
+          <span class="toggle-left">
+            <app-icon name="sound" [size]="20" />
+            <span>Sound effects</span>
+          </span>
+          <span class="switch" [class.on]="settings().sound"><span class="knob"></span></span>
+        </button>
+
+        <button type="button" class="toggle-row" (click)="toggleHaptics()">
+          <span class="toggle-left">
+            <app-icon name="vibrate" [size]="20" />
+            <span>Haptic feedback</span>
+          </span>
+          <span class="switch" [class.on]="settings().haptics"><span class="knob"></span></span>
+        </button>
+
+        <button type="button" class="toggle-row" (click)="toggleMusic()">
+          <span class="toggle-left">
+            <app-icon name="sound" [size]="20" />
+            <span>Background music</span>
+          </span>
+          <span class="switch" [class.on]="settings().music"><span class="knob"></span></span>
+        </button>
+
+        <div class="divider"></div>
+
+        <button
+          type="button"
+          class="btn w-full py-3 text-sm"
+          [class.btn-ghost]="!confirmReset()"
+          [class.btn-sun]="confirmReset()"
+          (click)="requestReset()"
+        >
+          {{ confirmReset() ? 'TAP AGAIN TO RESET PROGRESS' : 'RESET CAMPAIGN PROGRESS' }}
+        </button>
+        <p class="hint">Your coins, stars and unlocked levels will be cleared. This cannot be undone.</p>
+      </section>
+    </div>
+  }
+
+  @if (helpOpen()) {
+    <div class="overlay" (click)="closePanels()">
+      <section class="panel sheet animate-rise-in" (click)="$event.stopPropagation()">
+        <div class="sheet-head">
+          <h2 class="display text-2xl">HOW TO PLAY</h2>
+          <button type="button" class="icon-btn" aria-label="Close" (click)="closePanels()">
+            <app-icon name="close" [size]="18" />
+          </button>
+        </div>
+
+        <div class="help-list">
+          <div class="help-item">
+            <span class="help-icon drag"></span>
+            <div><strong>Drag left / right</strong><p>Your crowd runs forward automatically. Slide your thumb to steer.</p></div>
+          </div>
+          <div class="help-item">
+            <span class="help-icon plus">+25</span>
+            <div><strong>Pick the better gate</strong><p>Green adds, purple multiplies, red hurts. Two gates, one choice.</p></div>
+          </div>
+          <div class="help-item">
+            <span class="help-icon warn">!</span>
+            <div><strong>Dodge the hazards</strong><p>Hammers, saws, spikes and walls shrink your crowd on contact.</p></div>
+          </div>
+          <div class="help-item">
+            <span class="help-icon fight">VS</span>
+            <div><strong>Beat the finish</strong><p>Reach the battle with a bigger crowd than the enemy to win stars and coins.</p></div>
+          </div>
+        </div>
+
+        <button type="button" class="btn btn-primary w-full py-3" (click)="closePanels()">
+          GOT IT
+        </button>
+      </section>
+    </div>
+  }
+</div>

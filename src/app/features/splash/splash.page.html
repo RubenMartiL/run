@@ -1,0 +1,29 @@
+<div class="screen splash">
+  <div class="glow glow-a"></div>
+  <div class="glow glow-b"></div>
+
+  <div class="content">
+    <div class="mark animate-pop-in">
+      <div class="gate gate-left"></div>
+      <div class="title-wrap">
+        <h1 class="display title">GATE<br />RUNNER</h1>
+      </div>
+      <div class="gate gate-right"></div>
+    </div>
+
+    <div class="crowd animate-float-soft">
+      @for (i of [0, 1, 2, 3, 4]; track i) {
+        <span class="dot" [style.animation-delay.ms]="i * 90"></span>
+      }
+    </div>
+
+    <p class="tagline">Pick gates. Grow the crowd. Win the run.</p>
+  </div>
+
+  <div class="loader safe-bottom">
+    <div class="loader-track">
+      <div class="loader-fill" [style.width.%]="progress()"></div>
+    </div>
+    <span class="loader-label">{{ ready() ? 'READY TO RUN' : 'LOADING CROWD...' }}</span>
+  </div>
+</div>

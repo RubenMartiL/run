@@ -1,0 +1,122 @@
+<div class="screen shop">
+  <header class="safe-top px-4 pb-2">
+    <div class="header-row">
+      <button type="button" class="icon-btn" aria-label="Back" (click)="back()">
+        <app-icon name="back" [size]="19" />
+      </button>
+      <div class="header-title">
+        <span class="eyebrow">CUSTOMISE</span>
+        <h1 class="display text-2xl">SHOP</h1>
+      </div>
+      <div class="wallet">
+        <span class="chip glass-chip"><app-icon name="coin" [size]="15" class="text-sun-400" />{{ coins() }}</span>
+        <span class="chip glass-chip"><app-icon name="star" [size]="15" class="text-grape-400" />{{ gems() }}</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button type="button" class="tab" [class.active]="tab() === 'cosmetics'" (click)="setTab('cosmetics')">
+      COSMETICS
+    </button>
+    <button type="button" class="tab" [class.active]="tab() === 'gems'" (click)="setTab('gems')">
+      GEMS
+    </button>
+  </div>
+
+  <main class="shop-scroll">
+    @if (tab() === 'cosmetics') {
+      <div class="category-row">
+        @for (cat of categories; track cat.id) {
+          <button
+            type="button"
+            class="category"
+            [class.active]="category() === cat.id"
+            (click)="setCategory(cat.id)"
+          >
+            {{ cat.label }}
+          </button>
+        }
+      </div>
+
+      <div class="item-grid">
+        @for (item of items(); track item.id) {
+          <article class="item-card" [class.equipped]="isEquipped(item)">
+            <div class="preview" [style.background]="'radial-gradient(circle at 50% 30%, #ffffff22, transparent 60%), linear-gradient(160deg,' + item.primary + ',' + item.deep + ')'">
+              <span class="blob" [style.background]="'linear-gradient(180deg,' + item.primary + ',' + item.deep + ')'">
+                <span class="blob-eye left"></span>
+                <span class="blob-eye right"></span>
+                <span class="blob-mouth"></span>
+              </span>
+              @if (item.category === 'hat' && item.style !== 'none') {
+                <span class="hat-tag">{{ item.style }}</span>
+              }
+            </div>
+
+            <div class="item-body">
+              <div class="item-head">
+                <h3 class="display">{{ item.name }}</h3>
+                <span class="rarity" [class]="'rarity ' + item.rarity">{{ item.rarity }}</span>
+              </div>
+              <p class="item-desc">{{ item.description }}</p>
+
+              @if (isEquipped(item)) {
+                <span class="item-status equipped-status">
+                  <app-icon name="check" [size]="13" /> EQUIPPED
+                </span>
+              } @else if (isOwned(item)) {
+                <button type="button" class="btn btn-ghost item-btn" (click)="action(item)">EQUIP</button>
+              } @else {
+                <button type="button" class="btn btn-sun item-btn" (click)="action(item)">
+                  <app-icon [name]="item.priceGems > 0 ? 'star' : 'coin'" [size]="13" />
+                  {{ priceLabel(item) }}
+                </button>
+                <button type="button" class="try-btn" (click)="trialItem(item)">TRY · WATCH AD</button>
+              }
+            </div>
+          </article>
+        }
+      </div>
+
+      <button type="button" class="upgrade-cta" (click)="openUpgrades()">
+        <span class="upgrade-icon"><app-icon name="bolt" [size]="20" /></span>
+        <span class="upgrade-copy">
+          <strong>PERMANENT UPGRADES</strong>
+          <span>Starting crowd, coin bonus, gate bonus and lucky rewards.</span>
+        </span>
+        <app-icon name="next" [size]="18" />
+      </button>
+    } @else {
+      <div class="gem-hero">
+        <span class="gem-big">◆</span>
+        <h2 class="display">GEM VAULT</h2>
+        <p>Gems unlock legendary cosmetics. Purchases are mocked until the native store is connected.</p>
+      </div>
+
+      <div class="gem-list">
+        @for (product of products; track product.id) {
+          <article class="gem-card">
+            <span class="gem-amount">◆ {{ product.gems }}</span>
+            <div class="gem-copy">
+              <strong>{{ product.label }}</strong>
+              @if (product.bonus) {
+                <span class="gem-bonus">+{{ product.bonus }} bonus gems</span>
+              } @else {
+                <span class="gem-bonus">One-time add-on</span>
+              }
+            </div>
+            <button type="button" class="btn btn-primary gem-btn" (click)="buyGems(product.id)">
+              {{ product.price }}
+            </button>
+          </article>
+        }
+      </div>
+    }
+
+    <div class="footer-space"></div>
+  </main>
+
+  @if (toast()) {
+    <div class="toast animate-pop-in">{{ toast() }}</div>
+  }
+</div>
